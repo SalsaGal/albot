@@ -6,13 +6,21 @@ use serenity::prelude::*;
 
 struct Handler;
 
+fn get_name() -> String {
+    let contents = std::fs::read_to_string("src/words.txt").unwrap();
+    let split: Vec<&str> = contents.split('\n').collect();
+    split[1].to_owned()
+}
+
 #[async_trait]
 impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, _: Ready) {
         let channel = ChannelId(935501260352798751);
         println!("Start");
         channel.send_message(&ctx.http, |m| {
-            m.content("da vinki?")
+            m.content(
+                format!("Al is short for {}", get_name())
+            )
         }).await.unwrap();
     }
 }
