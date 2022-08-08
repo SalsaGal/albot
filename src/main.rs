@@ -1,3 +1,4 @@
+use rand::seq::SliceRandom;
 use serenity::async_trait;
 use serenity::framework::standard::StandardFramework;
 use serenity::model::gateway::Ready;
@@ -7,20 +8,22 @@ use serenity::prelude::*;
 struct Handler;
 
 fn get_name() -> String {
+    let mut rng = rand::thread_rng();
     let contents = std::fs::read_to_string("src/words.txt").unwrap();
     let split: Vec<&str> = contents.split('\n').collect();
-    split[1].to_owned()
+    split.choose(&mut rng).unwrap().to_string()
 }
 
 #[async_trait]
 impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, _: Ready) {
-        let channel = ChannelId(935501260352798751);
         println!("Start");
+        let text = format!("Al is short for {}", get_name());
+        println!("{}", &text);
+
+        let channel = ChannelId(935501260352798751);
         channel.send_message(&ctx.http, |m| {
-            m.content(
-                format!("Al is short for {}", get_name())
-            )
+            m.content(text)
         }).await.unwrap();
     }
 }
