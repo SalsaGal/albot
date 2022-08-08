@@ -1,7 +1,7 @@
 use serenity::async_trait;
-use serenity::framework::standard::{StandardFramework, CommandResult};
-use serenity::model::channel::Message;
+use serenity::framework::standard::StandardFramework;
 use serenity::model::gateway::Ready;
+use serenity::model::prelude::ChannelId;
 use serenity::prelude::*;
 
 struct Handler;
@@ -10,11 +10,11 @@ const TOKEN: &str = "MTAwNTc2MTI1NjQ5MTMzOTc4Ng.GEGPj-.1TmHuvFEFsRbFnS8voIVbwjhG
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn message(&self, _: Context, _: Message) {
-    }
-
-    async fn ready(&self, _: Context, _: Ready) {
-        println!("Ready");
+    async fn ready(&self, ctx: Context, _: Ready) {
+        let channel = ChannelId(935501260352798751);
+        channel.send_message(&ctx.http, |m| {
+            m.content("da vinki?")
+        }).await.unwrap();
     }
 }
 
