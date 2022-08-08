@@ -56,7 +56,7 @@ async fn main() {
     let framework = StandardFramework::new();
     let intents = GatewayIntents::GUILD_MESSAGES;
 
-    let token = std::env::args().nth(1).unwrap();
+    let token = include_str!("token.txt");
     let mut client = Client::builder(token, intents)
         .event_handler(Handler)
         .framework(framework)
