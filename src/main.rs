@@ -1,9 +1,11 @@
+use rand::random;
 use rand::seq::{SliceRandom, IteratorRandom};
 use serenity::async_trait;
 use serenity::framework::standard::StandardFramework;
 use serenity::model::gateway::Ready;
 use serenity::model::prelude::{GuildId, GuildChannel};
 use serenity::prelude::*;
+use std::time::Duration;
 
 struct Handler;
 
@@ -13,6 +15,8 @@ const CHANNELS: &[u64] = &[
     935500031757271040, // memes
     977157487914549270, // quoth-the-raven
 ];
+const MAX_WAIT_MINS: u64 = 60;
+const MAX_WAIT_SECS: u64 = MAX_WAIT_MINS * 60;
 
 fn get_name() -> String {
     let contents = std::fs::read_to_string("src/words.txt").unwrap();
@@ -25,21 +29,24 @@ impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, _: Ready) {
         println!("Start");
 
-        let text = format!("Al is short for {}", get_name());
-        println!("{}", &text);
+        loop {
+            let text = format!("Al is short for {}", get_name());
+            println!("{}", &text);
 
-        let guild = GuildId(935496615916077117);
-        let channels: Vec<GuildChannel> = guild.channels(&ctx.http).await.unwrap().into_iter().filter(
-            |(id, _)| {
-                CHANNELS.contains(&id.0)
+            let guild = GuildId(935496615916077117);
+            let channels: Vec<GuildChannel> = guild.channels(&ctx.http).await.unwrap().into_iter().filter(
+                |(id, _)| {
+                    CHANNELS.contains(&id.0)
+                }
+            ).map(|(_, channel)| channel).collect();
+            let channel = channels.iter().choose(&mut rand::thread_rng()).unwrap();
+            println!("Trying to send to {}", channel.name);
+            while let Err(err) = channel.send_message(&ctx.http, |m| {
+                m.content(&text)
+            }).await {
+                println!("Failed: {err}");
             }
-        ).map(|(_, channel)| channel).collect();
-        let channel = channels.iter().choose(&mut rand::thread_rng()).unwrap();
-        println!("Trying to send to {}", channel.name);
-        while let Err(err) = channel.send_message(&ctx.http, |m| {
-            m.content(&text)
-        }).await {
-            println!("Failed: {err}");
+            tokio::time::sleep(Duration::from_secs(random::<u64>() % MAX_WAIT_SECS)).await;
         }
     }
 }
