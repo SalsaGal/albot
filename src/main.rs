@@ -10,6 +10,7 @@ struct Handler;
 impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, _: Ready) {
         let channel = ChannelId(935501260352798751);
+        println!("Start");
         channel.send_message(&ctx.http, |m| {
             m.content("da vinki?")
         }).await.unwrap();
@@ -21,7 +22,8 @@ async fn main() {
     let framework = StandardFramework::new();
     let intents = GatewayIntents::GUILD_MESSAGES;
 
-    let mut client = Client::builder(TOKEN, intents)
+    let token = std::env::args().nth(1).unwrap();
+    let mut client = Client::builder(token, intents)
         .event_handler(Handler)
         .framework(framework)
         .await.unwrap();
