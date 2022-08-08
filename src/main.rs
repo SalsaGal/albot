@@ -6,8 +6,6 @@ use serenity::prelude::*;
 
 struct Handler;
 
-const TOKEN: &str = "MTAwNTc2MTI1NjQ5MTMzOTc4Ng.GEGPj-.1TmHuvFEFsRbFnS8voIVbwjhGvhv0JsEvYD3cs";
-
 #[async_trait]
 impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, _: Ready) {

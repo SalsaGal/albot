@@ -1,6 +1,0 @@
-[default]
-cargo run
-
-[check]
-cargo fmt
-cargo clippy
