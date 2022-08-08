@@ -2,10 +2,17 @@ use rand::seq::{SliceRandom, IteratorRandom};
 use serenity::async_trait;
 use serenity::framework::standard::StandardFramework;
 use serenity::model::gateway::Ready;
-use serenity::model::prelude::GuildId;
+use serenity::model::prelude::{GuildId, GuildChannel};
 use serenity::prelude::*;
 
 struct Handler;
+
+const CHANNELS: &[u64] = &[
+    935499944176005170, // general-chill
+    935499968922402906, // general-chaos
+    935500031757271040, // memes
+    977157487914549270, // quoth-the-raven
+];
 
 fn get_name() -> String {
     let contents = std::fs::read_to_string("src/words.txt").unwrap();
@@ -22,10 +29,14 @@ impl EventHandler for Handler {
         println!("{}", &text);
 
         let guild = GuildId(935496615916077117);
-        let channels = guild.channels(&ctx.http).await.unwrap();
+        let channels: Vec<GuildChannel> = guild.channels(&ctx.http).await.unwrap().into_iter().filter(
+            |(id, _)| {
+                CHANNELS.contains(&id.0)
+            }
+        ).map(|(_, channel)| channel).collect();
         let channel = channels.iter().choose(&mut rand::thread_rng()).unwrap();
-        println!("Trying to send to {}", channel.1.name);
-        while let Err(err) = channel.0.send_message(&ctx.http, |m| {
+        println!("Trying to send to {}", channel.name);
+        while let Err(err) = channel.send_message(&ctx.http, |m| {
             m.content(&text)
         }).await {
             println!("Failed: {err}");
