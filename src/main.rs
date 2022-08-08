@@ -19,7 +19,7 @@ const MAX_WAIT_MINS: u64 = 60;
 const MAX_WAIT_SECS: u64 = MAX_WAIT_MINS * 60;
 
 fn get_name() -> String {
-    let contents = std::fs::read_to_string("src/words.txt").unwrap();
+    let contents = include_str!("words.txt");
     let split: Vec<&str> = contents.split('\n').collect();
     split.choose(&mut rand::thread_rng()).unwrap().to_string()
 }
