@@ -29,6 +29,6 @@ async fn main() {
         .await.unwrap();
 
     if let Err(err) = client.start().await {
-        eprintln!("Cliend found error: {err}");
+        eprintln!("Client found error: {err}");
     }
 }
