@@ -15,7 +15,8 @@ const CHANNELS: &[u64] = &[
     935500031757271040, // memes
     977157487914549270, // quoth-the-raven
 ];
-const MAX_WAIT_MINS: u64 = 60;
+const MAX_WAIT_HOURS: u64 = 24;
+const MAX_WAIT_MINS: u64 = MAX_WAIT_HOURS * 60;
 const MAX_WAIT_SECS: u64 = MAX_WAIT_MINS * 60;
 
 fn get_name() -> String {
