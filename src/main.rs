@@ -1,9 +1,9 @@
 use rand::random;
-use rand::seq::{SliceRandom, IteratorRandom};
+use rand::seq::{IteratorRandom, SliceRandom};
 use serenity::async_trait;
 use serenity::framework::standard::StandardFramework;
 use serenity::model::gateway::Ready;
-use serenity::model::prelude::{GuildId, GuildChannel};
+use serenity::model::prelude::{GuildChannel, GuildId};
 use serenity::prelude::*;
 use std::time::Duration;
 
@@ -35,16 +35,17 @@ impl EventHandler for Handler {
             println!("{}", &text);
 
             let guild = GuildId(935496615916077117);
-            let channels: Vec<GuildChannel> = guild.channels(&ctx.http).await.unwrap().into_iter().filter(
-                |(id, _)| {
-                    CHANNELS.contains(&id.0)
-                }
-            ).map(|(_, channel)| channel).collect();
+            let channels: Vec<GuildChannel> = guild
+                .channels(&ctx.http)
+                .await
+                .unwrap()
+                .into_iter()
+                .filter(|(id, _)| CHANNELS.contains(&id.0))
+                .map(|(_, channel)| channel)
+                .collect();
             let channel = channels.iter().choose(&mut rand::thread_rng()).unwrap();
             println!("Trying to send to {}", channel.name);
-            while let Err(err) = channel.send_message(&ctx.http, |m| {
-                m.content(&text)
-            }).await {
+            while let Err(err) = channel.send_message(&ctx.http, |m| m.content(&text)).await {
                 println!("Failed: {err}");
             }
             tokio::time::sleep(Duration::from_secs(random::<u64>() % MAX_WAIT_SECS)).await;
@@ -61,7 +62,8 @@ async fn main() {
     let mut client = Client::builder(token, intents)
         .event_handler(Handler)
         .framework(framework)
-        .await.unwrap();
+        .await
+        .unwrap();
 
     if let Err(err) = client.start().await {
         eprintln!("Client found error: {err}");
