@@ -112,4 +112,6 @@ fn test_birthday() {
     assert!(!handler.do_birthday(5, 5));
     assert!(handler.do_birthday(8, 24));
     assert!(!handler.do_birthday(8, 24));
+    assert!(!handler.do_birthday(5, 5));
+    assert!(handler.do_birthday(8, 24));
 }
