@@ -24,29 +24,41 @@ fn get_name() -> String {
     split.choose(&mut rand::thread_rng()).unwrap().to_string()
 }
 
-struct Handler;
+struct Handler {
+    // Mutex feels like overkill, but like technically it's a memory safety thing
+    done_birthday: std::sync::Mutex<bool>,
+}
+
+impl Handler {
+    fn do_birthday(&self, month: u32, date: u32) -> bool {
+        let is_birthday = month == 8 && date == 24;
+
+        let mut done_birthday = self.done_birthday.lock().unwrap();
+
+        if is_birthday {
+            if *done_birthday {
+                false
+            } else {
+                *done_birthday = true;
+                true
+            }
+        } else {
+            if *done_birthday {
+                *done_birthday = false;
+            }
+            false
+        }
+    }
+}
 
 #[async_trait]
 impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, _: Ready) {
         println!("Start");
 
-        let mut done_birthday = false;
-
         loop {
             let now = Utc::now();
-            let is_birthday = now.month() == 8 && now.day() == 24;
-            let mut normal_text = true;
-
-            if is_birthday {
-                if !done_birthday {
-                    normal_text = false;
-                }
-            } else if done_birthday {
-                done_birthday = false;
-            }
-
-            let text = if normal_text {
+            let text = if self.do_birthday(now.month(), now.day()) {
                 format!("Al is short for {}", get_name())
             } else {
                 "AL IS SHORT FOR ALLEGRA HAPPY BIRTHDAY!!!!".to_owned()
@@ -79,7 +91,9 @@ async fn main() {
 
     let token = include_str!("token.txt");
     let mut client = Client::builder(token, intents)
-        .event_handler(Handler)
+        .event_handler(Handler {
+            done_birthday: std::sync::Mutex::new(false),
+        })
         .framework(framework)
         .await
         .unwrap();
@@ -87,4 +101,15 @@ async fn main() {
     if let Err(err) = client.start().await {
         eprintln!("Client found error: {err}");
     }
+}
+
+#[test]
+fn test_birthday() {
+    let handler = Handler {
+        done_birthday: std::sync::Mutex::new(false),
+    };
+
+    assert!(!handler.do_birthday(5, 5));
+    assert!(handler.do_birthday(8, 24));
+    assert!(!handler.do_birthday(8, 24));
 }
