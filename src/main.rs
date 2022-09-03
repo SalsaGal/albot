@@ -1,3 +1,4 @@
+use chrono::{Datelike, Utc};
 use rand::random;
 use rand::seq::{IteratorRandom, SliceRandom};
 use serenity::async_trait;
@@ -6,8 +7,6 @@ use serenity::model::gateway::Ready;
 use serenity::model::prelude::{GuildChannel, GuildId};
 use serenity::prelude::*;
 use std::time::Duration;
-
-struct Handler;
 
 const CHANNELS: &[u64] = &[
     935499944176005170, // general-chill
@@ -25,13 +24,33 @@ fn get_name() -> String {
     split.choose(&mut rand::thread_rng()).unwrap().to_string()
 }
 
+struct Handler;
+
 #[async_trait]
 impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, _: Ready) {
         println!("Start");
 
+        let mut done_birthday = false;
+
         loop {
-            let text = format!("Al is short for {}", get_name());
+            let now = Utc::now();
+            let is_birthday = now.month() == 8 && now.day() == 24;
+            let mut normal_text = true;
+
+            if is_birthday {
+                if !done_birthday {
+                    normal_text = false;
+                }
+            } else if done_birthday {
+                done_birthday = false;
+            }
+
+            let text = if normal_text {
+                format!("Al is short for {}", get_name())
+            } else {
+                "AL IS SHORT FOR ALLEGRA HAPPY BIRTHDAY!!!!".to_owned()
+            };
             println!("{}", &text);
 
             let guild = GuildId(935496615916077117);
